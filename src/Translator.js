@@ -12,7 +12,9 @@ export default class TranslatorEngine extends Component {
       translatedName: "",
       translatedAmount: "",
       translatedAmountWords: "",
-      regexp : /^[0-9\b]+$/
+      regexp : /^[0-9\b]+$/,
+      nameError: "",
+      amountError:""
     }
   }
 
@@ -30,14 +32,31 @@ export default class TranslatorEngine extends Component {
   }
 
   //Function to handle button click.
-  handleButtonClicked() {
-    axios.get('http://localhost:8080/translate?name=' + this.state.name + '&amount=' + this.state.amount).then(response => {
+  handleButtonClicked(event) {
+    let valid = true;
+    this.setState({ nameError:"", amountError:"" })
+    // name validation
+    if (!this.state.name) {
+      this.setState({ nameError : "*Please enter your name."});
+      valid = false;
+    }
+    // amount validation
+    if (!this.state.amount) {
+      this.setState({ amountError : "*Please enter amount in number."});
+      valid = false;
+    }
+
+
+    event.preventDefault();
+    console.log("valid = " + valid);
+    if (valid) {
+      axios.get('http://localhost:8080/translate?name=' + this.state.name + '&amount=' + this.state.amount).then(response => {
       this.setState({
         translatedName: response.data.name,
         translatedAmount: response.data.amount,
         translatedAmountWords: response.data.amountInWords
       });
-    })
+    })}
   }
 
   render() {
@@ -53,8 +72,10 @@ export default class TranslatorEngine extends Component {
             <Panel.Body>
               <p>Name</p>
               <p><input type="text" value={this.state.name} onChange={this.handleNameInputChanged.bind(this)} /></p>
+              <div className="errorMsg">{this.state.nameError}</div>
               <p>Amount (in digits)</p>
               <p><input type="text" value={this.state.amount} maxLength="10" pattern="[0-9]*"  onInput={this.handleAmountInputChanged.bind(this)} /></p>
+              <div className="errorMsg">{this.state.amountError}</div>
               <p>
                 <button type="submit" className="btn btn-info" onClick={this.handleButtonClicked.bind(this)}>
                   Click to View Details
