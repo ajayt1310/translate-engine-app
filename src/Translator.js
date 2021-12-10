@@ -10,7 +10,9 @@ export default class TranslatorEngine extends Component {
       name: "",
       amount: "",
       translatedName: "",
-      translatedAmount: ""
+      translatedAmount: "",
+      translatedAmountWords: "",
+      regexp : /^[0-9\b]+$/
     }
   }
 
@@ -23,9 +25,8 @@ export default class TranslatorEngine extends Component {
 
   //Function to handle amount text value.
   handleAmountInputChanged(event) {
-    this.setState({
-      amount: event.target.value
-    });
+    const amount = (event.target.validity.valid) ? event.target.value : this.state.amount;
+    this.setState({ amount });
   }
 
   //Function to handle button click.
@@ -33,7 +34,8 @@ export default class TranslatorEngine extends Component {
     axios.get('http://localhost:8080/translate?name=' + this.state.name + '&amount=' + this.state.amount).then(response => {
       this.setState({
         translatedName: response.data.name,
-        translatedAmount: response.data.amount
+        translatedAmount: response.data.amount,
+        translatedAmountWords: response.data.amountInWords
       });
     })
   }
@@ -52,7 +54,7 @@ export default class TranslatorEngine extends Component {
               <p>Name</p>
               <p><input type="text" value={this.state.name} onChange={this.handleNameInputChanged.bind(this)} /></p>
               <p>Amount (in digits)</p>
-              <p><input type="text" value={this.state.amount} onChange={this.handleAmountInputChanged.bind(this)} /></p>
+              <p><input type="text" value={this.state.amount} maxLength="10" pattern="[0-9]*"  onInput={this.handleAmountInputChanged.bind(this)} /></p>
               <p>
                 <button type="submit" className="btn btn-info" onClick={this.handleButtonClicked.bind(this)}>
                   Click to View Details
@@ -60,7 +62,7 @@ export default class TranslatorEngine extends Component {
               </p>
               <p>Name : {this.state.translatedName}</p>
               <p>Amount : {this.state.translatedAmount}</p>
-              <p>Amount (in words) : {this.state.translatedAmount}</p>
+              <p>Amount (in words) : {this.state.translatedAmountWords}</p>
             </Panel.Body>
           </Panel>
         </div>
